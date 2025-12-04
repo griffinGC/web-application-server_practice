@@ -3,8 +3,10 @@ package util;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
+import model.User;
 import org.junit.Test;
 
 import util.HttpRequestUtils.Pair;
@@ -69,5 +71,13 @@ public class HttpRequestUtilsTest {
         String header = "Content-Length: 59";
         Pair pair = HttpRequestUtils.parseHeader(header);
         assertThat(pair, is(new Pair("Content-Length", "59")));
+    }
+
+    @Test
+    public void testSaveUserData() throws UnsupportedEncodingException {
+        String queryParams = "userId=minyoung&password=pwd&name=minyoung&email=ssss%40naver.com";
+        User user = new User("minyoung", "pwd", "minyoung", "ssss@naver.com");
+        User testUser = HttpRequestUtils.saveUserData(queryParams);
+        assertThat(testUser, is(user));
     }
 }
