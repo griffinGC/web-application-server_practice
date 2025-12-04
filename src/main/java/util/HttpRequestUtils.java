@@ -1,13 +1,31 @@
 package util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import model.User;
 
 public class HttpRequestUtils {
+    /**
+     * @param queryString
+     * queryString 을 인자로 받아서 User 객체에 저장
+     * @return
+     */
+    public static User saveUserData(String queryString) throws UnsupportedEncodingException {
+        // queryString을 디코딩하는 작업 선행
+        String decodedData = URLDecoder.decode(queryString, StandardCharsets.UTF_8.toString());
+        System.out.println("decoded Data : " + decodedData);
+        Map<String, String> userData = parseQueryString(decodedData);
+        User user = new User(userData.get("userId"), userData.get("password"), userData.get("name"), userData.get("email"));
+        return user;
+    }
+
     /**
      * @param queryString은
      *            URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임

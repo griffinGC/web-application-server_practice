@@ -4,8 +4,10 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.HttpRequestUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -35,6 +37,14 @@ public class RequestHandler extends Thread {
                 if (datas[1] != null){
                     url = datas[1];
                     log.debug("location is : " + url);
+                    // ? 위치 찾아서 파싱
+                    int idx = url.indexOf("?");
+                    String requestUrl = url.substring(0, idx);
+                    log.debug("requestUrl : " + requestUrl);
+                    String params = url.substring(idx+1);
+                    log.debug("params data : " + params);
+                    User user = HttpRequestUtils.saveUserData(params);
+                    log.debug("user info : " + user.toString());
                 } else {
                     log.debug("location is null");
                 }
@@ -50,7 +60,7 @@ public class RequestHandler extends Thread {
             // file 읽어오기
             // 루트 디렉토리에서 이걸 실행해서 가능
             byte[] body;
-            if(!url.equals("")){
+            if(url.equals("/index.html")){
                 body = Files.readAllBytes(new File("./webapp" + url).toPath());
 //                log.debug("body data is : " + Arrays.toString(body));
             } else {
