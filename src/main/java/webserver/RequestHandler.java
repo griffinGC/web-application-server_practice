@@ -1,10 +1,8 @@
 package webserver;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +21,42 @@ public class RequestHandler extends Thread {
                 connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
+            // InputStream을 받아서 출력
+            BufferedInputStream inputStream = new BufferedInputStream(in);
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            int cnt = 0;
+            String line = bufferedReader.readLine();
+            // line의 방식이 GET, POST 인지에 따라 분류
+            String[] datas = line.split(" ");
+            String url = "";
+            log.debug("datas[0] : " + datas[0]);
+            if(datas[0].equals("GET") || datas[0].equals("POST")){
+                log.debug("HTTP 요청값은 : " + datas[0]);
+                if (datas[1] != null){
+                    url = datas[1];
+                    log.debug("location is : " + url);
+                } else {
+                    log.debug("location is null");
+                }
+            }
+            log.debug("cnt : " + cnt + " / line : " + line);
+            while (!"".equals(line)) {
+                line = bufferedReader.readLine();
+                if(line == null) return;
+                log.debug("cnt : " + cnt + " / line : " + line);
+                cnt++;
+            }
             DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = "Hello World".getBytes();
+            // file 읽어오기
+            // 루트 디렉토리에서 이걸 실행해서 가능
+            byte[] body;
+            if(!url.equals("")){
+                body = Files.readAllBytes(new File("./webapp" + url).toPath());
+//                log.debug("body data is : " + Arrays.toString(body));
+            } else {
+                body = "Hello World".getBytes();
+                log.debug("no data so return body : " + body);
+            }
             response200Header(dos, body.length);
             responseBody(dos, body);
         } catch (IOException e) {
